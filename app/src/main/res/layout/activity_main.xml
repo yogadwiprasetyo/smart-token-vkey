@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ProgressBar
+        android:id="@+id/loadingBar"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        tools:visibility="visible"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_below="@+id/loadingBar">
+
+                <!-- CREATE USER TMS -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create User TMS"/>
+                <Button
+                    android:id="@+id/btn_crt_user"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TRY"/>
+                <TextView
+                    android:id="@+id/response_crt_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- TOKEN ASSIGNMENT -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Token Assignment"/>
+                <Button
+                    android:id="@+id/btn_token_assign"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TRY"/>
+                <TextView
+                    android:id="@+id/response_token_assign"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- GET LOAD ACK TOKEN FIRMWARE -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="getLoad Ack Token Firmware"/>
+                <Button
+                    android:id="@+id/btn_getload_token"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TRY"/>
+                <TextView
+                    android:id="@+id/response_getload_token"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- LOAD TOKEN FIRMWARE -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="load Token Firmware"/>
+                <Button
+                    android:id="@+id/btn_load_token"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TRY"/>
+                <TextView
+                    android:id="@+id/response_load_token"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- CHECK AND REGISTER PIN -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Register PIN"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="7">
+                    <EditText
+                        android:hint="Minimum 6 numbers"
+                        android:id="@+id/input_register_pin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="16dp"
+                        android:layout_weight="2"/>
+                    <Button
+                        android:id="@+id/btn_register_pin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TRY"
+                        android:layout_weight="5"/>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/response_register_pin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- CHECK TOKEN -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Check Token"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="7">
+                    <EditText
+                        android:hint="Minimum 6 numbers"
+                        android:id="@+id/input_check_token"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="16dp"
+                        android:layout_weight="2"/>
+                    <Button
+                        android:id="@+id/btn_check_token"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TRY"
+                        android:layout_weight="5"/>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/response_check_token"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- REGISTER PUSH NOTIFICATION -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Register Push Notification"/>
+                <Button
+                    android:id="@+id/btn_regist_push_notif"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TRY"/>
+                <TextView
+                    android:id="@+id/push_token"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/response_regist_push_notif"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- REGISTERING PKI -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Register PKI Function"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="7">
+                    <EditText
+                        android:hint="Minimum 6 numbers"
+                        android:id="@+id/input_regist_pki"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="16dp"
+                        android:layout_weight="2"/>
+                    <Button
+                        android:id="@+id/btn_regist_pki"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TRY"
+                        android:layout_weight="5"/>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/response_regist_pki"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+</RelativeLayout>
