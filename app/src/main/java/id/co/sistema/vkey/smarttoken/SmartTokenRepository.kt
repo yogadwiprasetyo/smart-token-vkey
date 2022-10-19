@@ -1,15 +1,15 @@
-package id.co.sistema.vkey
+package id.co.sistema.vkey.smarttoken
 
 import android.content.Context
-import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
 import com.vkey.android.secure.net.Response
 import com.vkey.android.secure.net.SecureHttpUrlConnection
-import kotlinx.coroutines.Dispatchers
+import id.co.sistema.vkey.model.TokenAssignModel
+import id.co.sistema.vkey.model.TokenRequestTMSModel
+import id.co.sistema.vkey.model.UserRequestTMSModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 
 class SmartTokenRepository (private val context: Context) {
 

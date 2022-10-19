@@ -1,13 +1,11 @@
-package id.co.sistema.vkey
+package id.co.sistema.vkey.smarttoken
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Environment.getExternalStorageDirectory
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,19 +13,18 @@ import androidx.core.view.isVisible
 import com.google.gson.Gson
 import com.vkey.android.vguard.LocalBroadcastManager
 import com.vkey.android.vguard.VGuard
-import com.vkey.android.vtap.PNSType
 import com.vkey.android.vtap.VTapFactory
 import com.vkey.android.vtap.VTapInterface
 import com.vkey.android.vtap.VTapManager
-import com.vkey.android.vtap.pki.DistinguishedName
 import com.vkey.android.vtap.utility.ResultCode
+import com.vkey.android.vtap.utility.VTapUtility
+import id.co.sistema.vkey.CustomApplication
+import id.co.sistema.vkey.model.TokenAssignModel
 import id.co.sistema.vkey.databinding.ActivityMainBinding
-import id.co.sistema.vkey.smarttoken.MyFirebaseMessagingService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.and
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.properties.Delegates
 
@@ -48,19 +45,7 @@ class MainActivity : AppCompatActivity() {
         binding.pushToken.text = "FCM token:\n$pushToken"
 
         val pass = iVGuardManager!!.password
-        Log.d(TAG_MAIN, "Pass-1: $pass")
-        Log.d(TAG_MAIN, "Pass-2: ${String(pass)}")
-        Log.d(TAG_MAIN, "Pass-3: ${Base64.decode(pass, Base64.DEFAULT)}")
-        Log.d(TAG_MAIN, "Pass-4: ${bytesToHex(pass)}")
-        Log.d(TAG_MAIN, "Pass-5: ${bytesToHex(Base64.decode(pass, Base64.DEFAULT))}")
-
-        binding.btnCrtUser.setOnClickListener {
-            viewModel.createUserOnTMS()
-        }
-
-        binding.btnTokenAssign.setOnClickListener {
-            viewModel.assignToken()
-        }
+        Log.d(TAG_MAIN, "Password: ${VTapUtility.bytesToHex(pass)}")
 
         initiateSmartToken()
         setLocationDownload()
@@ -138,7 +123,9 @@ class MainActivity : AppCompatActivity() {
              * Renewal PKI Certificate Broadcast
              * */
             val pushBroadcastManager: LocalBroadcastManager = LocalBroadcastManager.getInstance(this@MainActivity)
-            pushBroadcastManager.registerReceiver(mPushReceiver, IntentFilter(PUSH_NOTIFICATION_BROADCAST))
+            pushBroadcastManager.registerReceiver(mPushReceiver, IntentFilter(
+                PUSH_NOTIFICATION_BROADCAST
+            ))
 
             /**
              *  Setup V-OS Smart Token
@@ -181,30 +168,32 @@ class MainActivity : AppCompatActivity() {
                     // TODO: Setup succeed, your action here
                     Log.d(TAG_MAIN, "VTap reciver sukses")
 
-                    /**
-                     *  Check Device Compatibility
-                     */
-                    when (iVTapManager.checkDeviceCompatibility()) {
-                        ResultCode.VTAP_WHITE_LISTED_DEVICE -> {
-                            /**
-                             *  TODO: Actions for whitelisted device, e.g. token provisioning,
-                             *  registration, transaction, authentication related actions, etc.
-                             *  See the API guide for the APIs available.
-                             */
-                            Log.d(TAG_MAIN, "Test SmartToken : 1")
-                        }
-                        ResultCode.VTAP_BLACK_LISTED_DEVICE -> {
-                            /**
-                             *  TODO: Action for blacklisted device, i.e. quit app
-                             */
-                            Log.d(TAG_MAIN, "Test SmartToken : 2")
-                        }
-                        ResultCode.VTAP_GREY_LISTED_DEVICE -> {
-                            /**
-                             *  TODO: Actions for the greylisted device, send device info and
-                             *  other similar activities as the whitelisted device if permitted.
-                             */
-                            Log.d(TAG_MAIN, "Test SmartToken : 3")
+                    CoroutineScope(Dispatchers.IO).launch {
+                        /**
+                         *  Check Device Compatibility
+                         */
+                        when (iVTapManager.checkDeviceCompatibility()) {
+                            ResultCode.VTAP_WHITE_LISTED_DEVICE -> {
+                                /**
+                                 *  TODO: Actions for whitelisted device, e.g. token provisioning,
+                                 *  registration, transaction, authentication related actions, etc.
+                                 *  See the API guide for the APIs available.
+                                 */
+                                Log.d(TAG_MAIN, "Test SmartToken : 1")
+                            }
+                            ResultCode.VTAP_BLACK_LISTED_DEVICE -> {
+                                /**
+                                 *  TODO: Action for blacklisted device, i.e. quit app
+                                 */
+                                Log.d(TAG_MAIN, "Test SmartToken : 2")
+                            }
+                            ResultCode.VTAP_GREY_LISTED_DEVICE -> {
+                                /**
+                                 *  TODO: Actions for the greylisted device, send device info and
+                                 *  other similar activities as the whitelisted device if permitted.
+                                 */
+                                Log.d(TAG_MAIN, "Test SmartToken : 3")
+                            }
                         }
                     }
                 } else {
@@ -276,8 +265,8 @@ class MainActivity : AppCompatActivity() {
         with(viewModel) {
             error.observe(owner, ::onError)
             isLoading.observe(owner, ::onLoading)
-            id.observe(owner, ::setUserId)
-            token.observe(owner, ::setTokenAssign)
+            id.observe(owner, ::showUserId)
+            token.observe(owner, ::showTokenAssign)
 
             loadAckTokenFirmwareStatus.observe(owner ) {
                 binding.responseGetloadToken.text = it
@@ -312,17 +301,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setUserId(id: String) {
+    private fun showUserId(id: String) {
         if (id.isEmpty()) {
             Log.i(TAG_MAIN, "ID is empty!")
             return
         }
 
         binding.responseCrtUser.text = id
-        userId = id
     }
 
-    private fun setTokenAssign(data: TokenAssignModel) {
+    private fun showTokenAssign(data: TokenAssignModel) {
         if (data.token.isNullOrEmpty() || data.apin.isNullOrEmpty()) {
             Log.i(TAG_MAIN, "Token or APIN is null or empty")
             return
@@ -331,242 +319,13 @@ class MainActivity : AppCompatActivity() {
         binding.responseTokenAssign.text = Gson().toJson(data)
     }
 
-//    private suspend fun provisioning(data: TokenAssignModel) {
-//        val tokenSerial = data.token.toString()
-//        // Decode using Base64
-//        val apin = Base64.decode(data.apin.toString(), Base64.DEFAULT)
-//        // Convert bytes to string Hexadecimal
-//        val apinStringHex = bytesToHex(apin)
-//
-//        withContext(Dispatchers.IO) {
-//            val provisioningInfo: ArrayList<String> = ArrayList(listOf(tokenSerial, apinStringHex))
-//            Log.d(TAG_MAIN, "Token = $tokenSerial and APIN = $apin")
-//
-//            val loadTokenFirmwareStatus = iVTapManager.getLoadAckTokenFirmware(provisioningInfo)
-//            when (loadTokenFirmwareStatus) {
-//                40600 -> {
-//                    /**
-//                     *  VTAP_TOKEN_DOWNLOAD_SUCCESS, token is loaded successfully
-//                     *  Proceed to create token PIN
-//                     */
-//                    Log.d(TAG_MAIN, "Test SmartToken : Provision 1")
-//                }
-//                40608 -> {
-//                    /**
-//                     *  VTAP_LOAD_FIRMWARE_SUCCESS, token is loaded successfully
-//                     *  Proceed to create token PIN
-//                     */
-//                    Log.d(TAG_MAIN, "Test SmartToken : Provision 2")
-//                }
-//                else -> {
-//                    /**
-//                     *  Other possible result codes
-//                     */
-//                    Log.d(TAG_MAIN, "Test SmartToken : Provision 3 -> $loadTokenFirmwareStatus")
-//                }
-//            }
-//        }
-//    }
-//
-//    private suspend fun loadTokenFirmware(provisioningInfo: ArrayList<String>) {
-//        withContext(Dispatchers.IO) {
-//            val loadTokenFirmwareStatus = iVTapManager.loadTokenFirmware(
-//                provisioningInfo[0],
-//                provisioningInfo[1],
-//                downloadFilePath
-//            )
-//
-//            if (loadTokenFirmwareStatus == 40608) {
-//                // VTAP_LOAD_FIRMWARE_SUCCESS, token is loaded successfully
-//                // Proceed to create token PIN
-//                Log.d(TAG_MAIN, "Test SmartToken LoadTokenFirmware Success")
-//
-//            } else {
-//                // Other possible result codes
-//                Log.d(TAG_MAIN, "Test SmartToken LoadTokenFirmware Failed")
-//            }
-//        }
-//    }
-//
-//    private suspend fun checkAndRegisterPIN(tokenSerial: String) {
-//        withContext(Dispatchers.IO) {
-//            /**
-//             *  Check if token is registered
-//             */
-//            val isTokenRegisteredStatus = iVTapManager.isTokenRegistered(tokenSerial)
-//
-//            /**
-//             *  If token is not registered, set token PIN
-//             */
-//            if (!isTokenRegisteredStatus) {
-//                /**
-//                 *  Create token PIN
-//                 */
-//                val createTokenPinStatus = iVTapManager.createTokenPIN(pin, tokenSerial)
-//                when (createTokenPinStatus) {
-//                    40700 -> {
-//                        /**
-//                         *  VTAP_CREATE_PIN_SUCCESS, create PIN successful
-//                         *  Proceed to check token PIN
-//                         */
-//                        Log.d(TAG_MAIN, "Test SmartToken : Provision 4")
-//                    }
-//                    40701 -> {
-//                        /**
-//                         *  VTAP_CREATE_PIN_FAILED, create PIN failed
-//                         */
-//                        Log.d(TAG_MAIN, "Test SmartToken : Provision 5")
-//                    }
-//                    else -> {
-//                        /**
-//                         *  Other possible result codes
-//                         */
-//                        Log.d(TAG_MAIN, "Test SmartToken : Provision 6 -> $createTokenPinStatus")
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    private suspend fun checkToken(tokenSerial: String) {
-//        withContext(Dispatchers.IO) {
-//            // Check token PIN
-//            val checkTokenPinStatus = iVTapManager.checkTokenPIN(pin, false, tokenSerial)
-//            Log.d(TAG_MAIN, "Return : $checkTokenPinStatus")
-//            when (checkTokenPinStatus) {
-//                40800 -> {
-//                    // VTAP_CHECK_PIN_SUCCESS, check PIN successful
-//                    // Proceed to OTP/PKI/FIDO2 functions
-//                    Log.d(TAG_MAIN, "Test SmartToken : Check PIN Success")
-//                }
-//                40801 -> {
-//                    // VTAP_CHECK_PIN_FAILED, check PIN failed
-//                    Log.d(TAG_MAIN, "Test SmartToken : Check PIN Failed")
-//                }
-//                else -> {
-//                    // Other possible result codes
-//                    Log.d(TAG_MAIN, "Test SmartToken : Check PIN Failed by $checkTokenPinStatus")
-//                }
-//            }
-//        }
-//    }
-//
-//    private suspend fun registerPushNotification() {
-//        withContext(Dispatchers.Main){
-//            // Based on your desired push notification service type,
-//            // i.e., PNSType.FCM, PNSType.HMS
-//            val pnsType = PNSType.FCM
-//
-//            // Checking for ASP authentication function
-//            if (iVTapManager.isPKIFunctionRegistered(VTapInterface.PKI_FUNC_ID_AUTH)) {
-//                iVTapManager.removePKIFunction(VTapInterface.PKI_FUNC_ID_AUTH);
-//            }
-//
-//            // Checking for SMP secure messaging function
-//            if (iVTapManager.isPKIFunctionRegistered(VTapInterface.PKI_FUNC_ID_V_MESSAGE)) {
-//                iVTapManager.removePKIFunction(VTapInterface.PKI_FUNC_ID_V_MESSAGE);
-//            }
-//
-//            Log.d(TAG_MAIN,"CrossCheck : user -> $userId , deviceId -> $deviceId , pushToken -> $pushToken , pnsType -> $pnsType")
-//            val pushRegResult = iVTapManager.pushNotificationRegister(
-//                null,
-//                null,
-//                pushToken,
-//                pnsType
-//            )
-//
-//            when (pushRegResult) {
-//                41014 -> {
-//                    // VTAP_CHECK_PIN_SUCCESS, check PIN successful
-//                    // Proceed to OTP/PKI/FIDO2 functions
-//                    Log.d(TAG_MAIN,"Test SmartToken : Register push notif Success")
-//                }
-//                else -> {
-//                    // Other possible result codes
-//                    Log.d(TAG_MAIN,"Test SmartToken : Register push notif failed by $pushRegResult")
-//                }
-//            }
-//        }
-//    }
-//
-//    private suspend fun registeringPKIFunc() {
-//        val distinguishedName = DistinguishedName().apply {
-//            country = "ID"
-//            stateName = "JKT"
-//            localityName = "IDN"
-//            organizationName = "Sistema"
-//            organizationUnit = "IT"
-//            givenName = "Test"
-//            surname = "TestUser"
-//            serialNumber = "ABC123"
-//            emailAddress = "test@test.id"
-//        }
-//
-//        withContext(Dispatchers.Main){
-//            // For ASP authentication function
-//            val aspGenerateCsrAndSendResult = iVTapManager.generateCsrAndSendSync(
-//                VTapInterface.PKI_FUNC_ID_AUTH,
-//                distinguishedName,
-//                pin,
-//                false
-//            )
-//
-//            // For SMP secure messaging function
-//            val smpGenerateCsrAndSendResult = iVTapManager.generateCsrAndSendSync(
-//                VTapInterface.PKI_FUNC_ID_V_MESSAGE,
-//                distinguishedName,
-//                "0", // Set pin to zero to avoid INVALID INPUT
-//                false
-//            )
-//
-//            Log.i(TAG_MAIN, "ASP status: $aspGenerateCsrAndSendResult")
-//            if (aspGenerateCsrAndSendResult == 41100) {
-//                // ASP certificate and authentication function is registered successfully
-//                Log.i(TAG_MAIN,"Test SmartToken : ASP certificate and secure messaging function is registered successfully")
-//            } else {
-//                // When generation failed
-//                Log.i(TAG_MAIN,"Test SmartToken : ASP generation failed")
-//            }
-//
-//            Log.i(TAG_MAIN, "SMP status: $smpGenerateCsrAndSendResult")
-//            if (smpGenerateCsrAndSendResult == 41100) {
-//                // SMP certificate and secure messaging function is registered successfully
-//                Log.i(TAG_MAIN,"Test SmartToken : SMP certificate and secure messaging function is registered successfully")
-//            } else {
-//                // When generation failed
-//                Log.i(TAG_MAIN,"Test SmartToken : SMP generation failed")
-//            }
-//        }
-//    }
-
-    /**
-     * Convert byteArray into Hex
-     */
-    fun bytesToHex(data: ByteArray?): String {
-        if (data == null) {
-            return ""
-        }
-        val len = data.size
-        var str = ""
-        for (i in 0 until len) {
-            str = if (data[i] and 0xFF < 16) str + "0" + Integer.toHexString(data[i] and 0xFF) else str + Integer.toHexString(
-                data[i] and 0xFF
-            )
-        }
-        Log.d(TAG_MAIN, str)
-        return str
-    }
-
     companion object {
         var iVTapManager: VTapManager by Delegates.notNull()
         var iVGuardManager: VGuard? = null
 
         private var downloadFilePath = ""
-        private var userId = ""
         private var deviceId = ""
         private var pushToken = ""
-
-//        private var pin = "111111"
 
         /**
          *  Set up server

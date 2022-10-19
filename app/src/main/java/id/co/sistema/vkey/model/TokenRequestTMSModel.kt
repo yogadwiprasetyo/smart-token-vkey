@@ -1,4 +1,4 @@
-package id.co.sistema.vkey
+package id.co.sistema.vkey.model
 
 data class TokenRequestTMSModel(
     val id: String?,

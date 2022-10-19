@@ -40,10 +40,7 @@
         tools:replace="android:theme"
         tools:targetApi="32">
         <activity
-            android:name=".smarttoken.SmartTokenActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".smarttoken.MainActivity"
             android:exported="false" />
         <activity
             android:name=".SplashScreenActivity"

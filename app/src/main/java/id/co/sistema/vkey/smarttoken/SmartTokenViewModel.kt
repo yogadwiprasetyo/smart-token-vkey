@@ -1,17 +1,21 @@
-package id.co.sistema.vkey
+package id.co.sistema.vkey.smarttoken
 
 import android.util.Base64
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.vkey.android.vtap.PNSType
 import com.vkey.android.vtap.VTapInterface
 import com.vkey.android.vtap.pki.DistinguishedName
-import com.vkey.android.vtap.utility.VTapUtility.bytesToHex
-import id.co.sistema.vkey.smarttoken.MyFirebaseMessagingService
+import com.vkey.android.vtap.utility.VTapUtility
+import id.co.sistema.vkey.model.TokenAssignModel
+import id.co.sistema.vkey.model.TokenRequestTMSModel
+import id.co.sistema.vkey.model.UserRequestTMSModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -104,7 +108,7 @@ class SmartTokenViewModel(private val repository: SmartTokenRepository) : ViewMo
         // Decode using Base64
         val apin = Base64.decode(token.value?.apin.toString(), Base64.DEFAULT)
         // Convert bytes to string Hexadecimal
-        val apinStringHex = bytesToHex(apin)
+        val apinStringHex = VTapUtility.bytesToHex(apin)
 
         viewModelScope.launch(errorHandler) {
             _isLoading.value = true
